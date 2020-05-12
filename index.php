@@ -20,7 +20,7 @@
 				$amino->send("I'm work.",$community_id,$peer_id);
 			} elseif($args[0] == "!img"){
 				$amino->sendImage("/root/phpamino/test.jpg", $community_id,$peer_id);
-			} elseif($args[0] == "!adio"){
+			} elseif($args[0] == "!audio"){
 				$amino->sendAudio("/root/phpamino/a.ogg", $community_id,$peer_id);
 			} elseif($args[0] == "!post"){
 				$amino->postBlog("Title", "Content", $community_id);
