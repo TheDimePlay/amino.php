@@ -10,6 +10,7 @@
 		$thread = $amino->getChats($coms[0][$i]["ndcId"]);
 
 		for($t=0;$t<=2;$t++){
+			if(!isset($thread[0][$t])) continue;
 
 			$msg = $thread[0][$t]["lastMessageSummary"]["content"]; // Content message
 			$from_id = $thread[0][$t]["lastMessageSummary"]["uid"]; // Author message
