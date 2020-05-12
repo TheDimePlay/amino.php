@@ -24,6 +24,11 @@
 			}
 			return $res; 
 		}
+		
+		public function getUser($com, $id){
+			$sid = $this->auth()["sid"];
+			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/user-profile/{$id}?action=visit&sid=".$sid),true);
+		}
 
 		// Get all chats in community
 		public function getChats($com){
