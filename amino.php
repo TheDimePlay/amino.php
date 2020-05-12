@@ -88,7 +88,12 @@
 		
 		public function deleteBlog($com, $postID){
 			$sid = $this->auth()["sid"];
-			return file_get_contents("https://service.narvii.com/api/v1/{$com}/s/blog/{$postID}?sid=".$sid);
+			return file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/blog/{$postID}?sid=".$sid);
+		}
+		
+		public function getCommunityBlogs($com){
+			$sid = $this->auth()["sid"];
+			return file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/feed/blog-all?start=0&size=50&sid=".$sid);
 		}
 
 		public function request($method, $params = array()){
