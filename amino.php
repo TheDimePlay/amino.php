@@ -79,6 +79,12 @@
 			$sid = $this->auth()["sid"];
 			return $this->request("x${com}/s/user-profile/${id}?sid=".$sid, ["content"=>$description,"timestamp"=>(time()*100)]);
 		}
+		
+		public function ban($member, $communty, $rejoin){
+			$sid = $this->auth()["sid"];
+			$rejoin = (int)$rejoin;
+			return file_get_contents("https://service.narvii.com:443/api/v1/x{$community}/s/chat/thread/{$sid}/member/{$member}?allowRejoin={$rejoin}");
+		}
 
 		public function request($method, $params = array()){
 			$ch = curl_init();
