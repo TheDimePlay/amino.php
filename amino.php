@@ -83,17 +83,22 @@
 		public function ban($member, $communty, $rejoin){
 			$sid = $this->auth()["sid"];
 			$rejoin = (int)$rejoin;
-			return file_get_contents("https://service.narvii.com:443/api/v1/x{$community}/s/chat/thread/{$sid}/member/{$member}?allowRejoin={$rejoin}");
+			return json_decode(file_get_contents("https://service.narvii.com:443/api/v1/x{$community}/s/chat/thread/{$sid}/member/{$member}?allowRejoin={$rejoin}"),true);
 		}
 		
 		public function deleteBlog($com, $postID){
 			$sid = $this->auth()["sid"];
-			return file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/blog/{$postID}?sid=".$sid);
+			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/blog/{$postID}?sid=".$sid),true);
 		}
-		
+
 		public function getCommunityBlogs($com){
 			$sid = $this->auth()["sid"];
-			return file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/feed/blog-all?start=0&size=50&sid=".$sid);
+			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/feed/blog-all?start=0&size=50&sid=".$sid),true)["blogList"];
+		}
+
+		public function commentBlog($content, $com, $postID){
+			$sid = $this->auth()["sid"];
+			return $this->request("x{$com}/s/blog/{$postID}/comment?sid=".$sid, ["content"=>$content,'mediaList'=> [],"eventSource"=>"PostDetailView","timestamp"=>(time()*100)]);
 		}
 
 		public function request($method, $params = array()){
