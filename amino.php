@@ -100,6 +100,11 @@
 			$sid = $this->auth()["sid"];
 			return $this->request("x{$com}/s/blog/{$postID}/comment?sid=".$sid, ["content"=>$content,'mediaList'=> [],"eventSource"=>"PostDetailView","timestamp"=>(time()*100)]);
 		}
+		
+		public function setLike($com, $postID){
+			$sid = $this->auth()["sid"];
+			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/blog/{$postID}/vote/?sid=".$sid),true);
+		}
 
 		public function request($method, $params = array()){
 			$ch = curl_init();
