@@ -65,7 +65,7 @@
 		// Get all User Blogs 
 		public function getUserBlogs($uid, $com){
 			$sid = $this->auth()["sid"];
-			return file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/blog?type=user&q={$uid}&start=0&size=50");
+			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/blog?type=user&q={$uid}&start=0&size=50"),true)["blogList"];
 		}
 
 		// Set new nickname in community
