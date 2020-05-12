@@ -5,7 +5,7 @@
 	$auth = $amino->auth();
 
 	$coms = $amino->getComs();
-	for($i=0;$i<=count($coms[0]);$i++){
+	for($i=0;$i<=(count($coms[0])-1);$i++){
 
 		$thread = $amino->getChats($coms[0][$i]["ndcId"]);
 
