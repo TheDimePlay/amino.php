@@ -1,7 +1,7 @@
 <?php 
 	include "amino.php";
 
-	$amino = new Amino("jeripllay2@gmail.com", "4719zx");
+	$amino = new Amino(email,password);
 	$auth = $amino->auth();
 
 	$coms = $amino->getComs();
