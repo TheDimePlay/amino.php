@@ -1,8 +1,15 @@
-<?php 
+<?php
 	class Amino{
 
-		private $email = "";
-		private $password = "";
+		///////////////////
+			private $email = "";
+			private $password = "";
+			private $socket = "";
+		/////////////////////
+			private $thread_id;
+			private $community_id;
+			private $message_id;
+		/////////////////////
 
 		public function __construct($email, $password){
 			$this->email = $email;
@@ -11,7 +18,63 @@
 
 		// Authorization in account
 		public function auth(){
+			$socket = $this->request("");
 			return $this->request("g/s/auth/login", ["email"=>$this->email,"secret"=>"0 ".$this->password,"deviceID"=>"015051B67B8D59D0A86E0F4A78F47367B749357048DD5F23DF275F05016B74605AAB0D7A6127287D9C","clientType"=>100,"action"=>"normal","timestamp"=>(time()*100)]);
+		}
+
+		public function listen($anon){
+			while(true){
+				$anon();
+			}
+		}
+
+		public function on($type, $anon){
+			$coms = $this->getComs();
+	        switch ($type) {
+	            case 'message_new':
+					for($i=0;$i<=(count($coms[0])-1);$i++){
+						$thread = $this->getChats($coms[0][$i]["ndcId"]);
+						for($t=0;$t<=2;$t++){
+							if(!isset($thread[0][$t])) continue;
+							$msg = $thread[0][$t]["lastMessageSummary"]["content"]; // Content message
+							$from_id = $thread[0][$t]["lastMessageSummary"]["uid"]; // Author message
+							$peer_id = $thread[0][$t]["threadId"]; // Chat sender
+							$community_id = $coms[0][$i]["ndcId"]; // Community sender
+							$result = array(
+								"message"=>$msg,
+								"author"=>$from_id,
+								"thread_id"=>$peer_id,
+								"community_id"=>$community_id,
+								"message_id"=>$thread[0][$t]["lastMessageSummary"]["messageId"]
+							);
+							$this->thread_id = $peer_id;
+							$this->community_id = $community_id;
+							$this->message_id = $result["message_id"];
+							$anon($result);
+						}
+					}
+	            break;
+	            case 'leave_chat':
+					for($i=0;$i<=(count($coms[0])-1);$i++){
+						$thread = $this->getChats($coms[0][$i]["ndcId"]);
+						for($t=0;$t<=2;$t++){
+							if(!isset($thread[0][$t]) || $thread[0][$t]["lastMessageSummary"]["type"] != 103) continue;
+							$from_id = $thread[0][$t]["lastMessageSummary"]["uid"]; // Author message
+							$peer_id = $thread[0][$t]["threadId"]; // Chat sender
+							$community_id = $coms[0][$i]["ndcId"]; // Community sender
+							$result = array(
+								"author"=>$from_id,
+								"thread_id"=>$peer_id,
+								"community_id"=>$community_id
+							);
+							$this->thread_id = $peer_id;
+							$this->community_id = $community_id;
+							$anon($result);
+							echo json_encode($thread[0][$t]["lastMessageSummary"],JSON_UNESCAPED_UNICODE);
+						}
+					}
+	            break;
+	        }
 		}
 
 		// Get all communitys
@@ -24,7 +87,7 @@
 			}
 			return $res; 
 		}
-		
+
 		public function getUser($com, $id){
 			$sid = $this->auth()["sid"];
 			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/user-profile/{$id}?action=visit&sid=".$sid),true);
@@ -41,10 +104,20 @@
 			return $res;  
 		}
 
+		public function getMessages($com, $thread){
+			$sid = $this->auth()["sid"];
+			return $this->request("x{$com}/s/chat/thread/${thread}/message?sid=".$sid, ["v"=>2,"pagingType"=>"t","size"=>10,"timestamp"=>(time()*100)]);
+		}
+
 		// Send simple message in chat
 		public function send($content, $com, $thread){
 			$sid = $this->auth()["sid"];
 			return $this->request("x${com}/s/chat/thread/${thread}/message?sid=".$sid,["content"=>$content,"type"=>0,"clientRefId"=>43196704,"timestamp"=>(time()*100)]);
+		}
+
+		public function reply($message){
+			$sid = $this->auth()["sid"];
+			return $this->request("x".$this->community_id."/s/chat/thread/".$this->thread_id."/message?sid=".$sid,["content"=>$message,"type"=>0,"clientRefId"=>43196704,"replyMessageId"=>$this->message_id ,"timestamp"=>(time()*100)]);
 		}
 
 		// Send image
@@ -84,13 +157,13 @@
 			$sid = $this->auth()["sid"];
 			return $this->request("x${com}/s/user-profile/${id}?sid=".$sid, ["content"=>$description,"timestamp"=>(time()*100)]);
 		}
-		
+
 		public function ban($member, $communty, $rejoin){
 			$sid = $this->auth()["sid"];
 			$rejoin = (int)$rejoin;
-			return json_decode(file_get_contents("https://service.narvii.com:443/api/v1/x{$community}/s/chat/thread/{$sid}/member/{$member}?allowRejoin={$rejoin}"),true);
+			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$community}/s/chat/thread/{$sid}/member/{$member}?allowRejoin={$rejoin}"),true);
 		}
-		
+
 		public function deleteBlog($com, $postID){
 			$sid = $this->auth()["sid"];
 			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/blog/{$postID}?sid=".$sid),true);
@@ -105,12 +178,12 @@
 			$sid = $this->auth()["sid"];
 			return $this->request("x{$com}/s/blog/{$postID}/comment?sid=".$sid, ["content"=>$content,'mediaList'=> [],"eventSource"=>"PostDetailView","timestamp"=>(time()*100)]);
 		}
-		
+
 		public function setLike($com, $postID){
 			$sid = $this->auth()["sid"];
-			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/blog/{$postID}/vote/?sid=".$sid),true);
+			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/blog/{$postID}/vote/?votedValueMap=0&sid=".$sid),true);
 		}
-		
+
 		public function commentProfile($content, $com, $id){
 			$sid = $this->auth()["sid"];
 			return $this->request("x{$com}/s/user-profile/{$id}/comment?sid={$sid}", ["content"=>$content,'mediaList'=> [],"eventSource"=>"PostDetailView","timestamp"=>(time()*100)]);
