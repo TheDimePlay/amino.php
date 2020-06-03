@@ -13,7 +13,4 @@
 				break;
 			}
 		});
-		$amino->on("leave_chat", function($data) use($amino){
-			$amino->send(".", $data["community_id"], $data["thread_id"]);
-		});
 	});
