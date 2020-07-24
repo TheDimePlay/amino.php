@@ -151,7 +151,7 @@
 		// fet all users for community
 		public function getCommunityUsers($uid,$com, $start = 0, $size = 50){
 			$sid = $this->auth()["sid"];
-			$base = json_decode(file_get_contents("https://service.narvii.com/api/v1/x".$com."/s/item?type=user-all&start=".$start."&size=".$size."&cv=1.2&uid=".$uid."&sid=".$sid),true);
+			$base = json_decode(file_get_contents("https://service.narvii.com/api/v1/x".$com."/s/item?type=user-all&start=".$start."&size=".$size."&sid=".$sid),true);
 			return $base;
 		}
 
@@ -213,9 +213,14 @@
 			return json_decode(file_get_contents("https://service.narvii.com/api/v1/x{$com}/s/blog/{$postID}/vote/?votedValueMap=0&sid=".$sid),true);
 		}
 
-		public function createChat($message = null, $com, $uid){
+		public function hidPost($reason, $post_id, $community_id){
 			$sid = $this->auth()["sid"];
-			return $this->request("create-chat-thread?sid=".$sid, ["ndcId"=>$com,'inviteeUids'=> [["{$uid}"]],"initialMessageContent"=>$messaeg,"type"=>0]);
+			return $this->request("x".$community_id."/s/blog/".$post_id."/admin",["adminOpName"=>110, "adminOpValue"=>9, "AdminOpNote"=>array("content"=>$reason), "timestamp"=>(time()*100)]);
+		}
+
+		public function createUserChat($message = null, $com, $uid){
+			$sid = $this->auth()["sid"];
+			return $this->request("x".$com."/s/chat/thread?sid=".$sid, ['inviteeUids'=> [[$uid]],"initialMessageContent"=>$messaeg,"type"=>0]);
 		}
 
 		public function commentProfile($content, $com, $id){
