@@ -215,7 +215,7 @@
 
 		public function hidPost($reason, $post_id, $community_id){
 			$sid = $this->auth()["sid"];
-			return $this->request("x".$community_id."/s/blog/".$post_id."/admin",["adminOpName"=>110, "adminOpValue"=>9, "AdminOpNote"=>array("content"=>$reason), "timestamp"=>(time()*100)]);
+			return $this->request("x".$community_id."/s/blog/".$post_id."/admin?sid=".$sid,["adminOpName"=>110, "adminOpValue"=>9, "AdminOpNote"=>array("content"=>$reason), "timestamp"=>(time()*100)]);
 		}
 
 		public function createUserChat($message = null, $com, $uid){
