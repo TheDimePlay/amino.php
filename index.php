@@ -8,7 +8,7 @@ while (true) {
     $client = new WebSocket\Client("wss://ws1.narvii.com?signbody=015051B67B8D59D0A86E0F4A78F47367B749357048DD5F23DF275F05016B74605AAB0D7A6127287D9C%7C".(time()*1000)."&sid=".$auth["sid"]);
     try {
         $result = json_decode($client->receive(),true);
-        if($result["t"] == 1000){ // Если пришло новое сообщение
+        if($result["t"] == 1000){ // If get new message
         	$community_id = $result["o"]["ndcId"];
         	$author = $result["o"]["chatMessage"]["author"]["uid"];
         	$avatar = $result["o"]["chatMessage"]["author"]["icon"];
