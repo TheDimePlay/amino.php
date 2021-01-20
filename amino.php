@@ -22,55 +22,6 @@
 			return $this->request("g/s/auth/login", ["email"=>$this->email,"secret"=>"0 ".$this->password,"deviceID"=>"015051B67B8D59D0A86E0F4A78F47367B749357048DD5F23DF275F05016B74605AAB0D7A6127287D9C","clientType"=>100,"action"=>"normal","timestamp"=>(time()*100)]);
 		}
 
-		public function listen($anon){
-			while(true){
-				$anon();
-			}
-		}
-
-		public function on($type, $anon){
-			$coms = $this->getComs();
-	        switch ($type) {
-	            case 'message_new':
-					for($i=0;$i<=(count($coms[0])-1);$i++){
-						$thread = $this->getChats($coms[0][$i]["ndcId"]);
-						for($t=0;$t<=2;$t++){
-							if(!isset($thread[0][$t])) continue;
-							$msg = $thread[0][$t]["lastMessageSummary"]["content"]; // Content message
-							$from_id = $thread[0][$t]["lastMessageSummary"]["uid"]; // Author message
-							$peer_id = $thread[0][$t]["threadId"]; // Chat sender
-							$community_id = $coms[0][$i]["ndcId"]; // Community sender
-							if(isset($thread[0][$t]["lastMessageSummary"]["extensions"]["mentionedArray"][0]["uid"])){
-								$notification = $thread[0][$t]["lastMessageSummary"]["extensions"]["mentionedArray"][0]["uid"];
-							} else {
-								$notification = null;
-							}
-							if(isset($thread[0][$t]["lastMessageSummary"]["replyMessageId"])){
-								$replyMessageId = $thread[0][$t]["lastMessageSummary"]["replyMessageId"];
-							} else {
-								$replyMessageId = null;
-							}
-							$result = array(
-								"message"=>$msg,
-								"notification"=>$notification,
-								"author"=>$from_id,
-								"reply_message_id"=>$replyMessageId,
-								"thread_id"=>$peer_id,
-								"time"=>$thread[0][$t]["lastMessageSummary"]["createdTime"],
-								"community_id"=>$community_id,
-								"message_id"=>$thread[0][$t]["lastMessageSummary"]["messageId"],
-								"data"=>json_encode($thread[0][$t]["lastMessageSummary"])
-							);
-							$this->thread_id = $peer_id;
-							$this->community_id = $community_id;
-							$this->message_id = $result["message_id"];
-							$anon($result);
-						}
-					}
-	            break;
-	        }
-		}
-
 		// Get all communitys
 		public function getComs(){
 			$sid = $this->auth()["sid"];
